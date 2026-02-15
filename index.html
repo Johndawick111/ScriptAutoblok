@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автоматическая блокировка конкурентов на Ozon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #005bff;
+            --danger: #ff3366;
+            --success: #00d97e;
+            --warning: #ffa825;
+            --dark: #0a0e27;
+            --light: #f8f9fa;
+            --accent: #7c3aed;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+        }
+
+        .bg-animated::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 3rem;
+            color: #b0b0b0;
+            animation: fadeInUp 0.8s ease 0.4s both;
+            font-weight: 500;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.5rem 3rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease 0.6s both;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(124, 58, 237, 0.5);
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: -5rem auto 0;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease both;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.8s; }
+        .stat-card:nth-child(2) { animation-delay: 1s; }
+        .stat-card:nth-child(3) { animation-delay: 1.2s; }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3.5rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #b0b0b0;
+        }
+
+        /* Problem Section */
+        .section {
+            padding: 8rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            text-align: center;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .problem-card {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.1), rgba(255, 168, 37, 0.05));
+            padding: 2.5rem;
+            border-radius: 20px;
+            border-left: 4px solid var(--danger);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+
+        .problem-card.visible {
+            animation: slideInLeft 0.6s ease forwards;
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .problem-card:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.15), rgba(255, 168, 37, 0.1));
+        }
+
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--danger);
+        }
+
+        .problem-text {
+            color: #d0d0d0;
+            line-height: 1.8;
+        }
+
+        /* Solution Section */
+        .solution-section {
+            background: linear-gradient(135deg, rgba(0, 91, 255, 0.1), rgba(124, 58, 237, 0.1));
+            border-radius: 40px;
+            padding: 4rem;
+            margin: 4rem 0;
+        }
+
+        .solution-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .solution-description {
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+
+        /* How It Works */
+        .steps {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 4rem auto;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 15px;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .step.visible {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .step:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(10px);
+        }
+
+        .step-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: var(--primary);
+            min-width: 60px;
+        }
+
+        .step-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+
+        .step-content p {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .feature-card.visible {
+            animation: scaleIn 0.6s ease forwards;
+        }
+
+        @keyframes scaleIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05);
+            border-color: var(--success);
+            box-shadow: 0 20px 60px rgba(0, 217, 126, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--success);
+        }
+
+        .feature-description {
+            color: #c0c0c0;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        .highlight-success {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .highlight-danger {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: linear-gradient(135deg, rgba(0, 217, 126, 0.1), rgba(0, 91, 255, 0.1));
+            border-radius: 40px;
+            padding: 4rem;
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--success);
+            margin-bottom: 3rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .result-item {
+            padding: 2rem;
+        }
+
+        .result-before {
+            font-size: 2rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .result-arrow {
+            font-size: 2rem;
+            margin: 1rem 0;
+            color: var(--warning);
+        }
+
+        .result-after {
+            font-size: 2.5rem;
+            color: var(--success);
+            font-weight: 700;
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .result-label {
+            margin-top: 1rem;
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        /* Warning Section */
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 168, 37, 0.1), rgba(255, 51, 102, 0.1));
+            border: 2px solid var(--warning);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+        }
+
+        .warning-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #e0e0e0;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(0, 91, 255, 0.15));
+            border-radius: 40px;
+            margin: 4rem 0;
+        }
+
+        .cta-section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #ffffff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-section p {
+            font-size: 1.3rem;
+            color: #c0c0c0;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .telegram-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 3rem;
+            background: linear-gradient(135deg, #0088cc, #00a6e3);
+            color: white;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 136, 204, 0.3);
+        }
+
+        .telegram-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0, 136, 204, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #808080;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scroll Reveal */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Bot Section */
+        .bot-section {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(0, 91, 255, 0.05));
+            border-radius: 40px;
+            padding: 4rem;
+            margin: 4rem 0;
+        }
+
+        .bot-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .bot-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .bot-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .bot-feature:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(10px);
+        }
+
+        .bot-feature-icon {
+            font-size: 2rem;
+        }
+
+        .bot-note {
+            background: rgba(255, 168, 37, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            color: #e0e0e0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            .stats {
+                margin-top: 2rem;
+                padding: 0 1rem;
+            }
+
+            .section {
+                padding: 4rem 1rem;
+            }
+
+            .solution-section,
+            .results-section,
+            .cta-section,
+            .bot-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .step {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-number {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">⚡ Защита от китайских конкурентов</div>
+            <h1>Автоматическая<br>Блокировка<br>Конкурентов</h1>
+            <p class="hero-subtitle">Защитите свои продажи и бренд от китайских продавцов на Ozon</p>
+            <a href="https://t.me/johndawick" class="cta-button">Получить скрипт</a>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">250-350</div>
+            <div class="stat-label">карточек блокируется в час</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">2000+</div>
+            <div class="stat-label">конкурентов на 500 SKU</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">99%</div>
+            <div class="stat-label">автоматизация процесса</div>
+        </div>
+    </div>
+
+    <!-- Problem Section -->
+    <section class="section">
+        <h2 class="section-title">Как китайцы крадут ваши продажи</h2>
+        <div class="problem-grid">
+            <div class="problem-card scroll-reveal">
+                <div class="problem-icon">💸</div>
+                <div class="problem-title">Потеря продаж</div>
+                <p class="problem-text">Покупатель нажимает «Есть дешевле» на вашей карточке и покупает у китайца по более низкой цене</p>
+            </div>
+            <div class="problem-card scroll-reveal">
+                <div class="problem-icon">😞</div>
+                <div class="problem-title">Разочарование клиентов</div>
+                <p class="problem-text">Покупатель получает товар другого качества и ассоциирует негатив с вашим брендом</p>
+            </div>
+            <div class="problem-card scroll-reveal">
+                <div class="problem-icon">📉</div>
+                <div class="problem-title">Падение трафика</div>
+                <p class="problem-text">Китайцы забирают ваш органический трафик и постепенно заполняют ваши карточки</p>
+            </div>
+            <div class="problem-card scroll-reveal">
+                <div class="problem-icon">⚠️</div>
+                <div class="problem-title">Рост конкурентов</div>
+                <p class="problem-text">Без регулярной чистки количество конкурентов может вырасти до тысяч карточек</p>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <div class="warning-title">
+                <span>⚡</span>
+                <span>Важно понимать</span>
+            </div>
+            <p class="warning-text">
+                Если китайских продавцов <span class="highlight-danger">не блокировать</span> — их количество <span class="highlight-danger">постоянно растет</span>. 
+                Для кабинета с 500 SKU легко может быть <span class="highlight">2000–4000</span> китайских конкурентов на ваших карточках.
+            </p>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="section">
+        <div class="solution-section scroll-reveal">
+            <h2 class="solution-title">Решение — Автоматический скрипт</h2>
+            <p class="solution-description">
+                Инструмент, который автоматически подает жалобы через <span class="highlight-success">официальную поддержку Ozon</span> 
+                на продавцов, использующих ваш контент. Работает <span class="highlight-success">24/7</span> без вашего участия.
+            </p>
+
+            <div class="steps">
+                <div class="step scroll-reveal">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>Открывает страницу поддержки</h3>
+                        <p>Скрипт автоматически заходит в систему поддержки Ozon и создает новое обращение</p>
+                    </div>
+                </div>
+                <div class="step scroll-reveal">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>Выбирает категорию жалобы</h3>
+                        <p>Автоматически определяет правильную категорию для блокировки конкурента</p>
+                    </div>
+                </div>
+                <div class="step scroll-reveal">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>Обрабатывает список SKU</h3>
+                        <p>Берет SKU конкурента из вашего Excel файла и вставляет в форму</p>
+                    </div>
+                </div>
+                <div class="step scroll-reveal">
+                    <div class="step-number">04</div>
+                    <div class="step-content">
+                        <h3>Прикладывает документы</h3>
+                        <p>Автоматически загружает документ правообладателя к каждой жалобе</p>
+                    </div>
+                </div>
+                <div class="step scroll-reveal">
+                    <div class="step-number">05</div>
+                    <div class="step-content">
+                        <h3>Отправляет и продолжает работу</h3>
+                        <p>Отправляет обращение и сразу переходит к следующему SKU без остановки</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section">
+        <h2 class="section-title">Возможности скрипта</h2>
+        <div class="features-grid">
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Высокая скорость</h3>
+                <p class="feature-description">
+                    <span class="highlight">250-350 карточек в час</span> блокируется автоматически. 
+                    Скорость зависит от производительности компьютера и интернета.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">Полная автоматизация</h3>
+                <p class="feature-description">
+                    Скрипт может работать <span class="highlight">часами без остановки</span>, 
+                    обрабатывая весь список конкурентов без вашего участия.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title">Умная обработка</h3>
+                <p class="feature-description">
+                    Если продавца невозможно заблокировать — скрипт <span class="highlight">автоматически пропускает</span> 
+                    и продолжает работу со следующим SKU.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Excel интеграция</h3>
+                <p class="feature-description">
+                    Просто загрузите Excel файл со списком SKU конкурентов, 
+                    и скрипт обработает их все автоматически.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">✅</div>
+                <h3 class="feature-title">Официальный метод</h3>
+                <p class="feature-description">
+                    Работает через <span class="highlight-success">официальную поддержку Ozon</span> — 
+                    это полностью легальный и безопасный способ.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">Непрерывная работа</h3>
+                <p class="feature-description">
+                    Скрипт автоматически создает новые обращения и продолжает работу 
+                    <span class="highlight">без зависаний и ошибок</span>.
+                </p>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <div class="warning-title">
+                <span>⚠️</span>
+                <span>Важно знать</span>
+            </div>
+            <p class="warning-text">
+                Во время работы скрипта <span class="highlight-danger">пользоваться компьютером нельзя</span>. 
+                Скрипт полностью управляет браузером и компьютером, как реальный человек. 
+                Это нормальная часть работы — так скрипт выполняет реальные действия в интерфейсе Ozon.
+            </p>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="section">
+        <div class="results-section scroll-reveal">
+            <h2 class="results-title">Результаты после блокировки</h2>
+            <p style="font-size: 1.2rem; color: #c0c0c0; margin-bottom: 3rem;">
+                Когда Ozon принимает жалобу, карточка конкурента блокируется и <span class="highlight-success">скрывается из продажи практически сразу</span>
+            </p>
+
+            <div class="results-grid">
+                <div class="result-item">
+                    <div class="result-before">2000-4000</div>
+                    <div class="result-arrow">↓</div>
+                    <div class="result-after">100-400</div>
+                    <div class="result-label">конкурентов для 500 SKU<br><span style="font-size: 0.9rem; color: #808080;">(средние показатели)</span></div>
+                </div>
+                <div class="result-item">
+                    <div class="result-before">Сотни</div>
+                    <div class="result-arrow">↓</div>
+                    <div class="result-after">0-100</div>
+                    <div class="result-label">конкурентов для 50-100 SKU<br><span style="font-size: 0.9rem; color: #808080;">(средние показатели)</span></div>
+                </div>
+                <div class="result-item">
+                    <div class="result-before" style="color: var(--danger); font-size: 1.8rem;">Потеря продаж</div>
+                    <div class="result-arrow">↓</div>
+                    <div class="result-after" style="font-size: 2rem;">Контроль</div>
+                    <div class="result-label">над вашими карточками</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Requirements -->
+    <section class="section">
+        <h2 class="section-title">Требования и установка</h2>
+        <div class="features-grid">
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">💻</div>
+                <h3 class="feature-title">Требования</h3>
+                <p class="feature-description">
+                    <span class="highlight">Windows</span><br>
+                    <span class="highlight">Стабильный интернет</span><br>
+                    <span class="highlight">Google Chrome</span><br><br>
+                    Высокая производительность не требуется — главное стабильность
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🔧</div>
+                <h3 class="feature-title">Установка</h3>
+                <p class="feature-description">
+                    Скрипт устанавливается <span class="highlight">удаленно через AnyDesk</span>. 
+                    Я выполню полную настройку, калибровку и проверку корректной работы.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Безопасность</h3>
+                <p class="feature-description">
+                    Можно использовать <span class="highlight-success">отдельный компьютер</span> без личных файлов. 
+                    Скрипт работает только с разделом поддержки Ozon.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Telegram Bot Section -->
+    <section class="section">
+        <div class="bot-section scroll-reveal">
+            <h2 class="bot-title">🤖 Дополнительно: Telegram бот</h2>
+            <p style="text-align: center; color: #c0c0c0; font-size: 1.2rem; margin-bottom: 2rem;">
+                Вспомогательный инструмент для автоматического поиска конкурентов
+            </p>
+
+            <div class="bot-features">
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">🔍</div>
+                    <div>
+                        <strong style="color: var(--light);">Находит карточки конкурентов</strong>
+                        <p style="color: #b0b0b0; margin: 0;">автоматически сканирует Ozon</p>
+                    </div>
+                </div>
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">📋</div>
+                    <div>
+                        <strong style="color: var(--light);">Собирает SKU</strong>
+                        <p style="color: #b0b0b0; margin: 0;">извлекает данные конкурентов</p>
+                    </div>
+                </div>
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">📊</div>
+                    <div>
+                        <strong style="color: var(--light);">Формирует Excel файл</strong>
+                        <p style="color: #b0b0b0; margin: 0;">готовый для загрузки в скрипт</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-note">
+                <strong style="color: var(--warning);">Важно:</strong> 
+                Бот не входит в комплект скрипта. В ближайшее время он будет работать только для пользователей, которые приобрели скрипт.<br><br>
+                <strong>Telegram бот:</strong> <a href="https://t.me/textophotdawick_bot" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 2px solid var(--primary); transition: all 0.3s ease;">@textophotdawick_bot</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee Section -->
+    <section class="section">
+        <h2 class="section-title">Гарантия и поддержка</h2>
+        <div class="features-grid">
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">✅</div>
+                <h3 class="feature-title">Гарантия работы</h3>
+                <p class="feature-description">
+                    Главная гарантия — <span class="highlight-success">установка скрипта и его полная рабочая настройка</span> 
+                    на вашем компьютере с проверкой всех функций.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">Бесплатные обновления</h3>
+                <p class="feature-description">
+                    Если Ozon изменит интерфейс или расположение кнопок — 
+                    я <span class="highlight-success">бесплатно выполню донастройку</span> скрипта.
+                </p>
+            </div>
+            <div class="feature-card scroll-reveal">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">Постоянная поддержка</h3>
+                <p class="feature-description">
+                    Я <span class="highlight-success">всегда на связи</span> и открыт к взаимодействию. 
+                    Помогу с любыми вопросами по работе скрипта.
+                </p>
+            </div>
+        </div>
+
+        <div class="warning-box" style="margin-top: 3rem;">
+            <div class="warning-title">
+                <span>📋</span>
+                <span>Условия</span>
+            </div>
+            <p class="warning-text">
+                Если Ozon изменит систему таким образом, что блокировка станет невозможной в принципе 
+                (даже после донастройки скрипта), оплата не возвращается. 
+                Скрипт работает через <span class="highlight">официальный механизм Ozon</span>, 
+                и финальная возможность блокировки зависит от самой платформы.
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section">
+        <div class="cta-section">
+            <h2 class="pulse">Верните контроль над своими карточками</h2>
+            <p>
+                Перестаньте терять продажи китайским конкурентам. 
+                Автоматизируйте блокировку и защитите свой бренд уже сегодня.
+            </p>
+            <a href="https://t.me/johndawick" class="telegram-button" target="_blank">
+                <span style="font-size: 1.5rem;">✈️</span>
+                <span>Связаться в Telegram</span>
+            </a>
+            <p style="margin-top: 2rem; font-size: 1rem; color: #808080;">
+                @johndawick
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Автоматическая блокировка конкурентов на Ozon © 2026</p>
+        <p style="margin-top: 1rem;">Telegram: @johndawick | Бот: @textophotdawick_bot</p>
+    </footer>
+
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all scroll-reveal elements
+        document.querySelectorAll('.scroll-reveal, .problem-card, .step, .feature-card').forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add stagger delay to grid items
+        document.querySelectorAll('.problem-grid .problem-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        document.querySelectorAll('.features-grid .feature-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        document.querySelectorAll('.steps .step').forEach((step, index) => {
+            step.style.animationDelay = `${index * 0.1}s`;
+        });
+    </script>
+</body>
+</html>
