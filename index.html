@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Автоматическая блокировка конкурентов на Ozon</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -28,6 +30,12 @@
             color: var(--light);
             overflow-x: hidden;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html {
+            overflow-x: hidden;
         }
 
         /* Animated Background */
@@ -241,8 +249,9 @@
             border-radius: 20px;
             border-left: 4px solid var(--danger);
             transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateX(-50px);
+            opacity: 1;
+            transform: none;
+            display: block;
         }
 
         .problem-card.visible {
@@ -320,8 +329,8 @@
             align-items: center;
             gap: 2rem;
             transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(30px);
+            opacity: 1;
+            transform: none;
         }
 
         .step.visible {
@@ -354,7 +363,7 @@
         /* Features Grid */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin: 4rem 0;
         }
@@ -365,19 +374,13 @@
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
-            opacity: 0;
-            transform: scale(0.9);
+            opacity: 1;
+            transform: none;
+            display: block;
         }
 
         .feature-card.visible {
-            animation: scaleIn 0.6s ease forwards;
-        }
-
-        @keyframes scaleIn {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            animation: fadeInUp 0.6s ease forwards;
         }
 
         .feature-card:hover {
@@ -630,34 +633,447 @@
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .hero {
-                padding: 4rem 1rem;
-            }
-
-            .stats {
-                margin-top: 2rem;
-                padding: 0 1rem;
-            }
-
+        @media (max-width: 1024px) {
             .section {
-                padding: 4rem 1rem;
+                padding: 4rem 1.5rem;
             }
 
             .solution-section,
             .results-section,
             .cta-section,
             .bot-section {
-                padding: 2rem 1.5rem;
+                padding: 3rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-size: 16px;
+            }
+
+            .hero {
+                padding: 1.5rem 1rem;
+                min-height: 85vh;
+            }
+
+            .hero-content {
+                width: 100%;
+                padding: 0;
+            }
+
+            .hero-badge {
+                font-size: 0.7rem;
+                padding: 0.35rem 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+                line-height: 1.2;
+            }
+
+            .hero-subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+                line-height: 1.5;
+            }
+
+            .cta-button {
+                padding: 1rem 1.5rem;
+                font-size: 0.95rem;
+                width: 90%;
+                max-width: 100%;
+                display: block;
+                margin: 0 auto;
+            }
+
+            .stats {
+                margin-top: 1.5rem;
+                padding: 0 0.5rem;
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .stat-card {
+                padding: 1.2rem 1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem;
+            }
+
+            .section {
+                padding: 3rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .problem-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .problem-card {
+                padding: 1.2rem;
+                border-radius: 15px;
+                border-left: 3px solid var(--danger);
+                opacity: 1 !important;
+                transform: none !important;
+                display: block !important;
+            }
+
+            .problem-icon {
+                font-size: 1.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .problem-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .problem-text {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .solution-section,
+            .results-section,
+            .cta-section,
+            .bot-section {
+                padding: 2rem 1rem;
+                border-radius: 20px;
+                margin: 2rem 0;
+                opacity: 1 !important;
+                transform: none !important;
+                display: block !important;
+            }
+
+            .solution-title,
+            .results-title,
+            .bot-title {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+                line-height: 1.3;
+            }
+
+            .solution-description {
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+            }
+
+            .steps {
+                gap: 1rem;
+                max-width: 100%;
+                margin: 2rem auto;
             }
 
             .step {
                 flex-direction: column;
                 text-align: center;
+                padding: 1.2rem;
+                gap: 0.8rem;
+                border-left: 3px solid var(--primary);
+                opacity: 1 !important;
+                transform: none !important;
+                display: flex !important;
             }
 
             .step-number {
                 min-width: auto;
+                font-size: 2rem;
+                margin: 0;
+            }
+
+            .step-content h3 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .step-content p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+                margin: 2rem 0;
+            }
+
+            .feature-card {
+                padding: 1.2rem;
+                opacity: 1 !important;
+                transform: none !important;
+                display: block !important;
+            }
+
+            .feature-card.visible {
+                animation: none !important;
+            }
+
+            .feature-icon {
+                font-size: 2.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .feature-title {
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .feature-description {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .warning-box {
+                padding: 1.2rem;
+                margin: 1.5rem 0;
+                border-left: 4px solid var(--warning);
+            }
+
+            .warning-title {
+                font-size: 1.2rem;
+                flex-direction: row;
+                text-align: left;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .warning-text {
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .result-before {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .result-arrow {
+                font-size: 1.5rem;
+                margin: 0.5rem 0;
+            }
+
+            .result-after {
+                font-size: 1.8rem;
+            }
+
+            .result-label {
+                font-size: 0.9rem;
+                margin-top: 0.5rem;
+            }
+
+            .bot-features {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .bot-feature {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .bot-feature-icon {
+                font-size: 1.8rem;
+            }
+
+            .bot-note {
+                padding: 1rem;
+                font-size: 0.85rem;
+                margin-top: 1.5rem;
+            }
+
+            .cta-section h2 {
+                font-size: 1.6rem;
+                margin-bottom: 1rem;
+            }
+
+            .cta-section p {
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+            }
+
+            .telegram-button {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+                width: 90%;
+                max-width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+            }
+
+            footer {
+                padding: 1.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            footer p {
+                margin-top: 0.5rem;
+                line-height: 1.4;
+            }
+
+            @media (max-width: 600px) {
+                h1 {
+                    font-size: 1.7rem;
+                }
+
+                .hero-subtitle {
+                    font-size: 0.85rem;
+                }
+
+                .section-title {
+                    font-size: 1.4rem;
+                }
+
+                .solution-title,
+                .results-title,
+                .bot-title,
+                .cta-section h2 {
+                    font-size: 1.4rem;
+                }
+
+                .stat-number {
+                    font-size: 1.8rem;
+                }
+
+                .feature-title {
+                    font-size: 1.1rem;
+                }
+
+                .problem-title {
+                    font-size: 1rem;
+                }
+
+                /* Ensure full width on very small devices */
+                .stats,
+                .problem-grid,
+                .features-grid,
+                .results-grid,
+                .bot-features,
+                .steps {
+                    gap: 0.8rem;
+                }
+
+                .hero {
+                    padding: 1rem 0.8rem;
+                }
+
+                .section {
+                    padding: 2rem 0.8rem;
+                }
+
+                .solution-section,
+                .results-section,
+                .cta-section,
+                .bot-section {
+                    padding: 1.5rem 0.8rem;
+                    margin: 1.5rem 0;
+                }
+            }
+
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 1.5rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .hero-subtitle {
+                    font-size: 0.8rem;
+                    margin-bottom: 1rem;
+                }
+
+                .section-title {
+                    font-size: 1.3rem;
+                    margin-bottom: 1.2rem;
+                }
+
+                .solution-title,
+                .results-title,
+                .bot-title,
+                .cta-section h2 {
+                    font-size: 1.3rem;
+                }
+
+                .cta-button,
+                .telegram-button {
+                    padding: 0.8rem 1.2rem;
+                    font-size: 0.9rem;
+                }
+
+                .stat-card {
+                    padding: 1rem;
+                }
+
+                .stat-number {
+                    font-size: 1.6rem;
+                }
+
+                .stat-label {
+                    font-size: 0.8rem;
+                }
+
+                .problem-card,
+                .feature-card,
+                .step {
+                    padding: 1rem;
+                }
+
+                .problem-icon {
+                    font-size: 1.6rem;
+                }
+
+                .feature-icon {
+                    font-size: 2rem;
+                }
+
+                .step-number {
+                    font-size: 1.8rem;
+                }
+
+                .feature-title {
+                    font-size: 1rem;
+                }
+
+                .feature-description,
+                .problem-text,
+                .step-content p {
+                    font-size: 0.85rem;
+                }
+
+                .result-before {
+                    font-size: 1.2rem;
+                }
+
+                .result-after {
+                    font-size: 1.6rem;
+                }
             }
         }
     </style>
@@ -676,22 +1092,6 @@
         </div>
     </section>
 
-    <!-- Stats -->
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-number">250-350</div>
-            <div class="stat-label">карточек блокируется в час</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">2000+</div>
-            <div class="stat-label">конкурентов на 500 SKU</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">99%</div>
-            <div class="stat-label">автоматизация процесса</div>
-        </div>
-    </div>
-
     <!-- Problem Section -->
     <section class="section">
         <h2 class="section-title">Как китайцы крадут ваши продажи</h2>
@@ -708,8 +1108,8 @@
             </div>
             <div class="problem-card scroll-reveal">
                 <div class="problem-icon">📉</div>
-                <div class="problem-title">Падение трафика</div>
-                <p class="problem-text">Китайцы забирают ваш органический трафик и постепенно заполняют ваши карточки</p>
+                <div class="problem-title">Потеря ниши</div>
+                <p class="problem-text">Китайцы забирают ваш органический трафик и постепенно заполняют вашу нишу</p>
             </div>
             <div class="problem-card scroll-reveal">
                 <div class="problem-icon">⚠️</div>
@@ -725,7 +1125,7 @@
             </div>
             <p class="warning-text">
                 Если китайских продавцов <span class="highlight-danger">не блокировать</span> — их количество <span class="highlight-danger">постоянно растет</span>. 
-                Для кабинета с 500 SKU легко может быть <span class="highlight">2000–4000</span> китайских конкурентов на ваших карточках.
+                В кабинете с 500 SKU на ваших карточках легко набирается <span class="highlight">2–10+ тысяч</span> китайских конкурентов.
             </p>
         </div>
     </section>
@@ -736,7 +1136,7 @@
             <h2 class="solution-title">Решение — Автоматический скрипт</h2>
             <p class="solution-description">
                 Инструмент, который автоматически подает жалобы через <span class="highlight-success">официальную поддержку Ozon</span> 
-                на продавцов, использующих ваш контент. Работает <span class="highlight-success">24/7</span> без вашего участия.
+                на продавцов, использующих ваш контент. Работает без вашего участия.
             </p>
 
             <div class="steps">
@@ -819,16 +1219,14 @@
                 <div class="feature-icon">✅</div>
                 <h3 class="feature-title">Официальный метод</h3>
                 <p class="feature-description">
-                    Работает через <span class="highlight-success">официальную поддержку Ozon</span> — 
-                    это полностью легальный и безопасный способ.
+                    Работает через <span class="highlight-success">официальную поддержку Ozon</span>
                 </p>
             </div>
             <div class="feature-card scroll-reveal">
                 <div class="feature-icon">🔄</div>
                 <h3 class="feature-title">Непрерывная работа</h3>
                 <p class="feature-description">
-                    Скрипт автоматически создает новые обращения и продолжает работу 
-                    <span class="highlight">без зависаний и ошибок</span>.
+                    Скрипт автоматически создает новые обращения и продолжает работу без остановки.
                 </p>
             </div>
         </div>
@@ -846,36 +1244,21 @@
         </div>
     </section>
 
-    <!-- Results Section -->
-    <section class="section">
-        <div class="results-section scroll-reveal">
-            <h2 class="results-title">Результаты после блокировки</h2>
-            <p style="font-size: 1.2rem; color: #c0c0c0; margin-bottom: 3rem;">
-                Когда Ozon принимает жалобу, карточка конкурента блокируется и <span class="highlight-success">скрывается из продажи практически сразу</span>
-            </p>
-
-            <div class="results-grid">
-                <div class="result-item">
-                    <div class="result-before">2000-4000</div>
-                    <div class="result-arrow">↓</div>
-                    <div class="result-after">100-400</div>
-                    <div class="result-label">конкурентов для 500 SKU<br><span style="font-size: 0.9rem; color: #808080;">(средние показатели)</span></div>
-                </div>
-                <div class="result-item">
-                    <div class="result-before">Сотни</div>
-                    <div class="result-arrow">↓</div>
-                    <div class="result-after">0-100</div>
-                    <div class="result-label">конкурентов для 50-100 SKU<br><span style="font-size: 0.9rem; color: #808080;">(средние показатели)</span></div>
-                </div>
-                <div class="result-item">
-                    <div class="result-before" style="color: var(--danger); font-size: 1.8rem;">Потеря продаж</div>
-                    <div class="result-arrow">↓</div>
-                    <div class="result-after" style="font-size: 2rem;">Контроль</div>
-                    <div class="result-label">над вашими карточками</div>
-                </div>
-            </div>
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">250-350</div>
+            <div class="stat-label">карточек блокируется в час</div>
         </div>
-    </section>
+        <div class="stat-card">
+            <div class="stat-number">3-5 часов</div>
+            <div class="stat-label">экономия времени на 20 SKU</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">99%</div>
+            <div class="stat-label">автоматизация процесса</div>
+        </div>
+    </div>
 
     <!-- Technical Requirements -->
     <section class="section">
@@ -906,46 +1289,6 @@
                     Можно использовать <span class="highlight-success">отдельный компьютер</span> без личных файлов. 
                     Скрипт работает только с разделом поддержки Ozon.
                 </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Telegram Bot Section -->
-    <section class="section">
-        <div class="bot-section scroll-reveal">
-            <h2 class="bot-title">🤖 Дополнительно: Telegram бот</h2>
-            <p style="text-align: center; color: #c0c0c0; font-size: 1.2rem; margin-bottom: 2rem;">
-                Вспомогательный инструмент для автоматического поиска конкурентов
-            </p>
-
-            <div class="bot-features">
-                <div class="bot-feature">
-                    <div class="bot-feature-icon">🔍</div>
-                    <div>
-                        <strong style="color: var(--light);">Находит карточки конкурентов</strong>
-                        <p style="color: #b0b0b0; margin: 0;">автоматически сканирует Ozon</p>
-                    </div>
-                </div>
-                <div class="bot-feature">
-                    <div class="bot-feature-icon">📋</div>
-                    <div>
-                        <strong style="color: var(--light);">Собирает SKU</strong>
-                        <p style="color: #b0b0b0; margin: 0;">извлекает данные конкурентов</p>
-                    </div>
-                </div>
-                <div class="bot-feature">
-                    <div class="bot-feature-icon">📊</div>
-                    <div>
-                        <strong style="color: var(--light);">Формирует Excel файл</strong>
-                        <p style="color: #b0b0b0; margin: 0;">готовый для загрузки в скрипт</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bot-note">
-                <strong style="color: var(--warning);">Важно:</strong> 
-                Бот не входит в комплект скрипта. В ближайшее время он будет работать только для пользователей, которые приобрели скрипт.<br><br>
-                <strong>Telegram бот:</strong> <a href="https://t.me/textophotdawick_bot" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 2px solid var(--primary); transition: all 0.3s ease;">@textophotdawick_bot</a>
             </div>
         </div>
     </section>
@@ -1009,6 +1352,46 @@
             <p style="margin-top: 2rem; font-size: 1rem; color: #808080;">
                 @johndawick
             </p>
+        </div>
+    </section>
+
+    <!-- Telegram Bot Section -->
+    <section class="section">
+        <div class="bot-section scroll-reveal">
+            <h2 class="bot-title">🤖 Дополнительно: Telegram бот</h2>
+            <p style="text-align: center; color: #c0c0c0; font-size: 1.2rem; margin-bottom: 2rem;">
+                Вспомогательный инструмент для автоматического поиска конкурентов
+            </p>
+
+            <div class="bot-features">
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">🔍</div>
+                    <div>
+                        <strong style="color: var(--light);">Находит карточки конкурентов</strong>
+                        <p style="color: #b0b0b0; margin: 0;">автоматически сканирует Ozon</p>
+                    </div>
+                </div>
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">📋</div>
+                    <div>
+                        <strong style="color: var(--light);">Собирает SKU</strong>
+                        <p style="color: #b0b0b0; margin: 0;">извлекает данные конкурентов</p>
+                    </div>
+                </div>
+                <div class="bot-feature">
+                    <div class="bot-feature-icon">📊</div>
+                    <div>
+                        <strong style="color: var(--light);">Формирует Excel файл</strong>
+                        <p style="color: #b0b0b0; margin: 0;">готовый для загрузки в скрипт</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-note">
+                <strong style="color: var(--warning);">Важно:</strong> 
+                Бот не входит в комплект скрипта. В ближайшее время он будет работать только для пользователей, которые приобрели скрипт.<br><br>
+                <strong>Telegram бот:</strong> <a href="https://t.me/textophotdawick_bot" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 2px solid var(--primary); transition: all 0.3s ease;">@textophotdawick_bot</a>
+            </div>
         </div>
     </section>
 
